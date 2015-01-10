@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Very simple chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { padding: 3px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #585858; }
+      form input { padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li {
+        padding: 3px 10px;
+      }
+      .message {
+        position: relative;
+        padding-bottom: 5px;
+        border-bottom: solid 1px #A4A4A4;
+      }
+      .message > div.date {
+        font-size: x-small;
+        position: absolute;
+        right: 20px;
+        bottom: 3px;
+        color: #848484;
+      }
+      .message > div.text {
+
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.js"></script>
+    <script>
+      function createHtmlFromMessage(message) {
+        return '' +
+          '<div class="message" data-message-id="' + message._id + '">' +
+            '<div class="date">' + moment(message.create).format('Do MMM YYYY HH:mm:ss') + '</div>' +
+            '<div class="text">' + message.text + '</div>' +
+          '</div>';
+      }
+
+      var socket = io();
+      $('form').submit(function() {
+        // when the form is submitted, the socket send in 'chat message' chat the log
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+      // when the server send a message to the client, the js appends formatted html code
+      socket.on('chat message', function(message) {
+        $('#messages').append($('<li>').html(createHtmlFromMessage(message)));
+      });
+
+      // force focus on input
+      $('#m').focus();
+    </script>
+  </body>
+</html>
